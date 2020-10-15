@@ -1,0 +1,7 @@
+{
+    "apiKey": "",
+    "secretKey": "",
+    "subAccount": "",
+    "myName": "",
+    "ding": "https://oapi.dingtalk.com/robot/send?access_token=ceffe0f6de141b5cf52a712e52975970c23f2fefe8ce6f9d5b8132dd614397d59e"
+}
