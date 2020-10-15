@@ -9,7 +9,6 @@ import (
 	"net/http"
 	"os"
 	"strconv"
-	"sync"
 	"time"
 )
 
@@ -62,7 +61,7 @@ var (
 )
 
 type OrderMap struct {
-	mutex  sync.Mutex
+	// mutex  sync.Mutex
 	orders map[string]*GridOrder
 }
 
@@ -73,14 +72,14 @@ func NewOrderMap() *OrderMap {
 }
 
 func (orderm *OrderMap) add(order *GridOrder) {
-	orderm.mutex.Lock()
-	defer orderm.mutex.Unlock()
+	// orderm.mutex.Lock()
+	// defer orderm.mutex.Unlock()
 	orderm.orders[order.ClientId] = order
 }
 
 func (orderm *OrderMap) RangeOver(fn func(order *GridOrder) bool) {
-	orderm.mutex.Lock()
-	defer orderm.mutex.Unlock()
+	// orderm.mutex.Lock()
+	// defer orderm.mutex.Unlock()
 	for _, order := range orderm.orders {
 		if !fn(order) {
 			break
@@ -89,14 +88,14 @@ func (orderm *OrderMap) RangeOver(fn func(order *GridOrder) bool) {
 }
 
 func (orderm *OrderMap) remove(clientId string) {
-	orderm.mutex.Lock()
-	defer orderm.mutex.Unlock()
+	// orderm.mutex.Lock()
+	// defer orderm.mutex.Unlock()
 	delete(orderm.orders, clientId)
 }
 
 func (orderm *OrderMap) get(clientId string) (*GridOrder, bool) {
-	orderm.mutex.Lock()
-	defer orderm.mutex.Unlock()
+	// orderm.mutex.Lock()
+	// defer orderm.mutex.Unlock()
 	order, found := orderm.orders[clientId]
 	return order, found
 }
@@ -279,6 +278,7 @@ type GridOrder struct {
 	EQty       float64
 	CreateAt   time.Time
 	UpdateTime time.Time
+	DeleteAt   time.Time
 	Grid       *TradeGrid
 	Side       string
 }
