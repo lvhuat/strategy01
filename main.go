@@ -43,7 +43,7 @@ func main() {
 	wsclient.subOrder()
 	eventChan := make(chan interface{}, 1000)
 	wsclient.onOrderChange = func(body []byte) {
-		order := Order{}
+		order := &Order{}
 		raw := gjson.GetBytes(body, "data").Raw
 		json.Unmarshal([]byte(raw), &order)
 		if order.ClientID == "" {

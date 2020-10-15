@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/sirupsen/logrus"
+	"github.com/tidwall/gjson"
 
 	"github.com/gorilla/websocket"
 )
@@ -31,16 +32,19 @@ func (client *WebsocketClient) loop() {
 			break
 		}
 
-		// type_ := gjson.GetBytes(b, "type").String()
-		// channel := gjson.GetBytes(b, "channel").String()
+		type_ := gjson.GetBytes(b, "type").String()
+		channel := gjson.GetBytes(b, "channel").String()
 
 		logrus.Println(string(b))
-		// switch type_ {
-		// case "subscribed":
-		// 	switch channel {
-
-		// 	}
-		// }
+		switch type_ {
+		case "update":
+			switch channel {
+			case "orders":
+				if client.onOrderChange != nil {
+					client.onOrderChange(b)
+				}
+			}
+		}
 	}
 }
 

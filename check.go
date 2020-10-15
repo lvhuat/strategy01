@@ -1,7 +1,6 @@
 package main
 
 import (
-	"math"
 	"time"
 
 	"github.com/google/uuid"
@@ -44,7 +43,7 @@ func check() bool {
 		// 买入仅仅当行情大于格子价格才会形成挂单
 		if grid.OpenChance > 0.0 && grid.OpenAt <= bid1 {
 			clientId := uuid.New().String()
-			place(clientId, perpName, "buy", grid.OpenAt, "limit", math.Min(grid.Qty, grid.OpenChance), false, true)
+			place(clientId, perpName, "buy", grid.OpenAt, "limit", grid.OpenChance, false, true)
 			order := &GridOrder{
 				ClientId: clientId,
 				Qty:      grid.Qty,
@@ -59,7 +58,7 @@ func check() bool {
 
 		if grid.CloseChance > 0.0 {
 			clientId := uuid.New().String()
-			place(clientId, perpName, "sell", grid.CloseAt, "limit", math.Min(grid.CloseChance, grid.Qty), false, false)
+			place(clientId, perpName, "sell", grid.CloseAt, "limit", grid.CloseChance, false, false)
 			order := &GridOrder{
 				ClientId: clientId,
 				Qty:      grid.Qty,
@@ -111,10 +110,10 @@ func onOrderChange(order *Order) {
 	// 订单关闭处理未成交部分
 	if closed {
 		if order.Side == "buy" {
-			grid.OpenChance += order.RemainingSize
+			grid.OpenChance += order.Size - order.FilledSize
 			grid.openOrders.remove(order.ClientID)
 		} else {
-			grid.CloseChance += order.RemainingSize
+			grid.CloseChance += order.Size - order.FilledSize
 			grid.closeOrders.remove(order.ClientID)
 		}
 

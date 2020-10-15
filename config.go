@@ -138,10 +138,9 @@ func place(clientId string, market string, side string, price float64, _type str
 	json.Unmarshal(b, &result)
 
 	if result.Error != "" {
+		RejectOrder(clientId, side)
 		SendDingTalkAsync(fmt.Sprintln("发送订单失败:", market, side, price, _type, size, reduce, "原因：", result.Error))
 	}
-
-	RejectOrder(clientId, side)
 
 	log.Infoln("PlaceResult", string(b))
 }

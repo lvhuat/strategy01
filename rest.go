@@ -292,7 +292,7 @@ func parseResultWrap(err error, r *http.Response, out interface{}) error {
 	}
 	defer r.Body.Close()
 
-	fmt.Println(string(body))
+	//fmt.Println(string(body))
 	var result Result
 	if err := json.Unmarshal(body, &result); err != nil {
 		return err
