@@ -123,6 +123,7 @@ func onOrderChange(order *Order) {
 
 	// 订单未处理成交部分
 	if delta > 0.0 {
+		gridOrder.EQty = order.FilledSize
 		if order.Side == "buy" {
 			grid.CloseChance += delta
 		} else {
