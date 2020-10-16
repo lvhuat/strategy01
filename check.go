@@ -69,14 +69,14 @@ func check() bool {
 			place(clientId, perpName, "buy", grid.OpenAt, "limit", grid.OpenChance, false, true)
 			order := &GridOrder{
 				ClientId: clientId,
-				Qty:      grid.Qty,
+				Qty:      grid.OpenChance,
 				CreateAt: time.Now(),
 				Grid:     grid,
 				Side:     "buy",
 			}
 			grid.openOrders.add(order)
 			orderMap.add(order)
-			grid.OpenChance -= grid.Qty
+			grid.OpenChance -= grid.OpenChance
 		}
 
 		if grid.CloseChance > 0.0 && grid.CloseAt < ask1*1.14 {
@@ -84,14 +84,14 @@ func check() bool {
 			place(clientId, perpName, "sell", grid.CloseAt, "limit", grid.CloseChance, false, false)
 			order := &GridOrder{
 				ClientId: clientId,
-				Qty:      grid.Qty,
+				Qty:      grid.CloseChance,
 				CreateAt: time.Now(),
 				Grid:     grid,
 				Side:     "sell",
 			}
 			grid.closeOrders.add(order)
 			orderMap.add(order)
-			grid.CloseChance -= grid.Qty
+			grid.CloseChance -= grid.CloseChance
 		}
 
 		if changed {
