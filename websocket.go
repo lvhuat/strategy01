@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"net/http"
 	"time"
 
 	"github.com/sirupsen/logrus"
@@ -18,11 +19,14 @@ type WebsocketClient struct {
 	subAccount string
 
 	onOrderChange func(body []byte)
+
+	quit chan interface{}
 }
 
 func (client *WebsocketClient) loop() {
 	conn := client.conn
 	defer conn.Close()
+	defer close(client.quit)
 
 	for {
 		conn.SetReadDeadline(time.Now().Add(time.Minute))
@@ -44,6 +48,8 @@ func (client *WebsocketClient) loop() {
 					client.onOrderChange(b)
 				}
 			}
+		case "error":
+			logrus.Errorln("SubscribeError", string(b))
 		}
 	}
 }
@@ -74,7 +80,9 @@ func (client *WebsocketClient) login() error {
 
 func (client *WebsocketClient) send(t int, body []byte) error {
 	logrus.Println("send", string(body))
+	client.conn.SetWriteDeadline(time.Now().Add(time.Second * 15))
 	if err := client.conn.WriteMessage(t, body); err != nil {
+		logrus.WithError(err).Errorln("WebsocketWriteMessageFailed")
 		return err
 	}
 	return nil
@@ -97,7 +105,10 @@ func (client *WebsocketClient) subDepths(market string) error {
 }
 
 func (client *WebsocketClient) dial(auth bool) error {
-	c, _, err := websocket.DefaultDialer.Dial("wss://ftx.com/ws/", nil)
+	c, _, err := (&websocket.Dialer{
+		Proxy:            http.ProxyFromEnvironment,
+		HandshakeTimeout: time.Second * 10,
+	}).Dial("wss://ftx.com/ws/", nil)
 	if err != nil {
 		return err
 	}
@@ -134,4 +145,8 @@ func (client *WebsocketClient) dial(auth bool) error {
 	}
 
 	return nil
+}
+
+func (client *WebsocketClient) waitFinished() {
+	<-client.quit
 }

@@ -32,25 +32,42 @@ func main() {
 	if *cfgFile != "" {
 		loadBaseConfigAndAssign(*cfgFile)
 	}
-	wsclient := WebsocketClient{
-		apiKey:     apiKey,
-		secret:     []byte(secretKey),
-		subAccount: subAccount,
-	}
-	wsclient.dial(false)
-	wsclient.ping()
-	wsclient.login()
-	wsclient.subOrder()
+
 	eventChan := make(chan interface{}, 1000)
-	wsclient.onOrderChange = func(body []byte) {
-		order := &Order{}
-		raw := gjson.GetBytes(body, "data").Raw
-		json.Unmarshal([]byte(raw), &order)
-		if order.ClientID == "" {
-			return
+
+	go func() {
+		for {
+			wsclient := WebsocketClient{
+				apiKey:     apiKey,
+				secret:     []byte(secretKey),
+				subAccount: subAccount,
+				quit:       make(chan interface{}),
+			}
+
+			if err := wsclient.dial(false); err != nil {
+				logrus.WithError(err).Errorln("DialWebsocketFailed")
+				time.Sleep(time.Second)
+				continue
+			}
+
+			wsclient.ping()
+			wsclient.login()
+			wsclient.subOrder()
+			wsclient.onOrderChange = func(body []byte) {
+				order := &Order{}
+				raw := gjson.GetBytes(body, "data").Raw
+				json.Unmarshal([]byte(raw), &order)
+				if order.ClientID == "" {
+					return
+				}
+				eventChan <- order
+			}
+
+			wsclient.waitFinished()
+			logrus.Errorln("WebsocketStop")
+			time.Sleep(time.Second)
 		}
-		eventChan <- order
-	}
+	}()
 
 	RejectOrder = func(clientId, side string) {
 		eventChan <- &EventRejectOrder{
