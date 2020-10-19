@@ -117,8 +117,16 @@ func (client *WebsocketClient) dial(auth bool) error {
 	go client.loop()
 	go func() {
 		defer client.close()
+		defer logrus.Errorln("PingLoopStop")
+	PINGLOOP:
 		for {
 			time.Sleep(time.Second * 15)
+			select {
+			case <-client.quit:
+				break PINGLOOP
+			case <-time.After(time.Second * 14):
+			}
+
 			if client.ping() != nil {
 				break
 			}
