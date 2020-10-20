@@ -27,7 +27,7 @@ type EventRejectOrder struct {
 	Side     string
 }
 
-type GridPeristItem struct {
+type GridPersistItem struct {
 	Grids  []*TradeGrid
 	Time   time.Time
 	Ask    float64
@@ -36,7 +36,7 @@ type GridPeristItem struct {
 }
 
 func persistGrids() {
-	d, err := yaml.Marshal(&GridPeristItem{
+	d, err := yaml.Marshal(&GridPersistItem{
 		Grids:  grids,
 		Time:   time.Now(),
 		Symbol: perpName,
@@ -172,7 +172,7 @@ func main() {
 
 		// 未能及时同步的订单，将采用单个同步的方式同步
 		orderMap.RangeOver(func(order *GridOrder) bool {
-			if time.Now().Sub(order.UpdateTime) < time.Second*20 {
+			if time.Now().Sub(order.UpdateTime) < time.Second*3 {
 				return true
 			}
 			ftxOrder, err := client.getOrderByClient(order.ClientId)

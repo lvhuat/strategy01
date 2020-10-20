@@ -228,7 +228,7 @@ func loadFromSaveFile(file string) error {
 	if err != nil {
 		return err
 	}
-	var persistItem GridPeristItem
+	var persistItem GridPersistItem
 	if err := yaml.Unmarshal(b, &persistItem); err != nil {
 		return err
 	}
@@ -291,7 +291,7 @@ type GridOrder struct {
 	EQty       float64
 	CreateAt   time.Time
 	UpdateTime time.Time
-	DeleteAt   time.Time
+	DeleteAt   time.Time  `yaml:"-"`
 	Grid       *TradeGrid `yaml:"-"`
 	Side       string
 }
