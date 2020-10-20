@@ -64,9 +64,9 @@ func check() bool {
 	changed := false
 	for index, grid := range grids {
 		// 买入仅仅当行情大于格子价格才会形成挂单
+
 		if grid.OpenChance >= perp.SizeIncrement && grid.OpenAt <= bid1 && grid.OpenAt > (bid1*0.86) {
 			clientId := uuid.New().String()
-			place(clientId, perpName, "buy", grid.OpenAt, "limit", grid.OpenChance, false, true)
 			order := &GridOrder{
 				ClientId: clientId,
 				Qty:      grid.OpenChance,
@@ -74,14 +74,17 @@ func check() bool {
 				Grid:     grid,
 				Side:     "buy",
 			}
-			grid.OpenOrders.add(order)
-			orderMap.add(order)
+			qty := grid.OpenChance
 			grid.OpenChance -= grid.OpenChance
+			grid.OpenOrders.add(order)
+			persistGrids() // 提前持久话避免崩溃丢失
+
+			place(clientId, perpName, "buy", grid.OpenAt, "limit", qty, false, true)
+			orderMap.add(order)
 		}
 
 		if grid.CloseChance >= perp.SizeIncrement && grid.CloseAt < ask1*1.14 {
 			clientId := uuid.New().String()
-			place(clientId, perpName, "sell", grid.CloseAt, "limit", grid.CloseChance, false, false)
 			order := &GridOrder{
 				ClientId: clientId,
 				Qty:      grid.CloseChance,
@@ -90,8 +93,13 @@ func check() bool {
 				Side:     "sell",
 			}
 			grid.CloseOrders.add(order)
-			orderMap.add(order)
+			qty := grid.CloseChance
 			grid.CloseChance -= grid.CloseChance
+			persistGrids() // 提前持久话避免崩溃丢失
+
+			orderMap.add(order)
+
+			place(clientId, perpName, "sell", grid.CloseAt, "limit", qty, false, false)
 		}
 
 		if changed {
@@ -126,8 +134,10 @@ func onOrderChange(order *Order) {
 		gridOrder.EQty = order.FilledSize
 		if order.Side == "buy" {
 			grid.CloseChance += delta
+			grid.OpenTotal += delta
 		} else {
 			grid.OpenChance += delta
+			grid.CloseTotal += delta
 		}
 	}
 

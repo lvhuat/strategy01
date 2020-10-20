@@ -4,20 +4,22 @@ grids:
   closeat: 3.4
   openchance: 0
   closechance: 0
+  opentotal: 0
+  closetotal: 0
   openorders:
     orders:
-      0bdaca8e-0c30-4fe4-b0df-f093d2008bfe:
-        clientid: 0bdaca8e-0c30-4fe4-b0df-f093d2008bfe
-        id: 12144895722
+      30975667-3bee-4789-aa53-dbaa0c05f018:
+        clientid: 30975667-3bee-4789-aa53-dbaa0c05f018
+        id: 12146034188
         qty: 0.1
         eqty: 0
-        createat: 2020-10-20T15:28:41.94691507+08:00
-        updatetime: 2020-10-20T15:33:25.11831277+08:00
+        createat: 2020-10-20T15:48:02.529006217+08:00
+        updatetime: 2020-10-20T15:48:07.530481132+08:00
         deleteat: 0001-01-01T00:00:00Z
         side: buy
   closeorders:
     orders: {}
-time: 2020-10-20T15:33:26.620217959+08:00
-ask: 3.104
-bid: 3.103
+time: 2020-10-20T15:48:07.530485339+08:00
+ask: 3.082
+bid: 3.079
 symbol: UNI-PERP

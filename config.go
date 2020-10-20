@@ -106,7 +106,7 @@ func debugGrid() {
 }
 
 func place(clientId string, market string, side string, price float64, _type string, size float64, reduce bool, post bool) {
-	log.Infoln("PlaceOrder", market, side, price, _type, size, "reduce", reduce, "postonly", post)
+	log.Infoln("PlaceOrder", clientId, market, side, price, _type, size, "reduce", reduce, "postonly", post)
 	if *testMode {
 		return
 	}
@@ -303,6 +303,8 @@ type TradeGrid struct {
 	OpenChance  float64
 	CloseChance float64
 
+	OpenTotal   float64
+	CloseTotal  float64
 	OpenOrders  *OrderMap
 	CloseOrders *OrderMap
 }
