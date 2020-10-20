@@ -3,11 +3,14 @@ package main
 import (
 	"encoding/json"
 	"flag"
+	"io/ioutil"
+	"os"
 	"time"
 
 	"github.com/lvhuat/textformatter"
 	"github.com/sirupsen/logrus"
 	"github.com/tidwall/gjson"
+	"gopkg.in/yaml.v2"
 )
 
 var (
@@ -22,6 +25,28 @@ var mf = flag.Bool("mf", false, "仅监控保证金率")
 type EventRejectOrder struct {
 	ClientId string
 	Side     string
+}
+
+type GridPeristItem struct {
+	Grids  []*TradeGrid
+	Time   time.Time
+	Ask    float64
+	Bid    float64
+	Symbol string
+}
+
+func persistGrids() {
+	d, err := yaml.Marshal(&GridPeristItem{
+		Grids:  grids,
+		Time:   time.Now(),
+		Symbol: perpName,
+		Ask:    ask1,
+		Bid:    bid1,
+	})
+	if err != nil {
+		log.Fatalf("error: %v", err)
+	}
+	ioutil.WriteFile("save.yaml", d, 0666)
 }
 
 func main() {
@@ -85,6 +110,14 @@ func main() {
 		loadGridConfigAndAssign(*gridFile)
 	}
 
+	if _, err := os.Stat("./save.yaml"); os.IsNotExist(err) {
+		if *gridFile != "" {
+			loadGridConfigAndAssign(*gridFile)
+		}
+	} else {
+		loadFromSaveFile("save.yaml")
+	}
+
 	// 打印网格配置
 	debugGrid()
 	// 打印持仓
@@ -105,6 +138,7 @@ func main() {
 	wait := checkInterval
 	lastSyncOrderTime := time.Now()
 	for {
+		persistGrids()
 		select {
 		case <-time.After(wait):
 			check()

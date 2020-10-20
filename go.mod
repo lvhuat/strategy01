@@ -8,4 +8,5 @@ require (
 	github.com/lvhuat/textformatter v1.0.1
 	github.com/sirupsen/logrus v1.7.0
 	github.com/tidwall/gjson v1.6.1
+	gopkg.in/yaml.v2 v2.3.0
 )

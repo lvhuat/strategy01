@@ -36,12 +36,12 @@ func check() bool {
 		return false
 	}
 
-	bid1, ask1 := perp.Bid, perp.Ask
+	bid1, ask1 = perp.Bid, perp.Ask
 
 	// 撤掉离盘口太远的订单
 	for _, grid := range grids {
 		// 低于当前盘口太远的买档位撤销
-		for _, order := range grid.openOrders.orders {
+		for _, order := range grid.OpenOrders.Orders {
 			if grid.OpenAt < bid1 {
 				if grid.OpenAt < bid1*0.85 && time.Now().Sub(order.DeleteAt) > time.Second*20 {
 					client.deleteOrder(order.Id)
@@ -51,7 +51,7 @@ func check() bool {
 		}
 
 		// 高于当前盘口太远的卖盘不挂
-		for _, order := range grid.closeOrders.orders {
+		for _, order := range grid.CloseOrders.Orders {
 			if grid.CloseAt > ask1 {
 				if grid.CloseAt > ask1*1.15 && time.Now().Sub(order.DeleteAt) > time.Second*20 {
 					client.deleteOrder(order.Id)
@@ -64,7 +64,7 @@ func check() bool {
 	changed := false
 	for index, grid := range grids {
 		// 买入仅仅当行情大于格子价格才会形成挂单
-		if grid.OpenChance > perp.SizeIncrement && grid.OpenAt <= bid1 && grid.OpenAt > (bid1*0.86) {
+		if grid.OpenChance >= perp.SizeIncrement && grid.OpenAt <= bid1 && grid.OpenAt > (bid1*0.86) {
 			clientId := uuid.New().String()
 			place(clientId, perpName, "buy", grid.OpenAt, "limit", grid.OpenChance, false, true)
 			order := &GridOrder{
@@ -74,12 +74,12 @@ func check() bool {
 				Grid:     grid,
 				Side:     "buy",
 			}
-			grid.openOrders.add(order)
+			grid.OpenOrders.add(order)
 			orderMap.add(order)
 			grid.OpenChance -= grid.OpenChance
 		}
 
-		if grid.CloseChance > perp.SizeIncrement && grid.CloseAt < ask1*1.14 {
+		if grid.CloseChance >= perp.SizeIncrement && grid.CloseAt < ask1*1.14 {
 			clientId := uuid.New().String()
 			place(clientId, perpName, "sell", grid.CloseAt, "limit", grid.CloseChance, false, false)
 			order := &GridOrder{
@@ -89,7 +89,7 @@ func check() bool {
 				Grid:     grid,
 				Side:     "sell",
 			}
-			grid.closeOrders.add(order)
+			grid.CloseOrders.add(order)
 			orderMap.add(order)
 			grid.CloseChance -= grid.CloseChance
 		}
@@ -135,10 +135,10 @@ func onOrderChange(order *Order) {
 	if closed {
 		if order.Side == "buy" {
 			grid.OpenChance += order.Size - order.FilledSize
-			grid.openOrders.remove(order.ClientID)
+			grid.OpenOrders.remove(order.ClientID)
 		} else {
 			grid.CloseChance += order.Size - order.FilledSize
-			grid.closeOrders.remove(order.ClientID)
+			grid.CloseOrders.remove(order.ClientID)
 		}
 
 		// 从全局订单表中移除订单
@@ -156,10 +156,10 @@ func onRejectOrder(clientId, side string) {
 
 	if side == "buy" {
 		grid.OpenChance += gridOrder.Qty
-		grid.openOrders.remove(clientId)
+		grid.OpenOrders.remove(clientId)
 	} else {
 		grid.CloseChance += gridOrder.Qty
-		grid.closeOrders.remove(clientId)
+		grid.CloseOrders.remove(clientId)
 	}
 	orderMap.remove(clientId)
 }
