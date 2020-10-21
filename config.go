@@ -45,6 +45,8 @@ var (
 
 	ask1 float64
 	bid1 float64
+
+	profitTotal float64
 )
 
 type PersistData struct {
@@ -236,6 +238,8 @@ func loadFromSaveFile(file string) error {
 	perpName = persistItem.Symbol
 	grids = persistItem.Grids
 	for _, grid := range grids {
+		profitTotal += grid.CloseTotal * (grid.CloseAt - grid.OpenAt)
+
 		for _, order := range grid.OpenOrders.Orders {
 			orderMap.add(order)
 			order.Grid = grid

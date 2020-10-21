@@ -28,20 +28,22 @@ type EventRejectOrder struct {
 }
 
 type GridPersistItem struct {
-	Grids  []*TradeGrid
-	Time   time.Time
-	Ask    float64
-	Bid    float64
-	Symbol string
+	Time        time.Time
+	Ask         float64
+	Bid         float64
+	Symbol      string
+	ProfitTotal float64
+	Grids       []*TradeGrid
 }
 
 func persistGrids() {
 	d, err := yaml.Marshal(&GridPersistItem{
-		Grids:  grids,
-		Time:   time.Now(),
-		Symbol: perpName,
-		Ask:    ask1,
-		Bid:    bid1,
+		Grids:       grids,
+		Time:        time.Now(),
+		Symbol:      perpName,
+		Ask:         ask1,
+		Bid:         bid1,
+		ProfitTotal: profitTotal,
 	})
 	if err != nil {
 		log.Fatalf("error: %v", err)

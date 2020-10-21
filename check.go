@@ -43,7 +43,7 @@ func check() bool {
 		// 低于当前盘口太远的买档位撤销
 		for _, order := range grid.OpenOrders.Orders {
 			if grid.OpenAt < bid1 {
-				if grid.OpenAt < bid1*0.85 && time.Now().Sub(order.DeleteAt) > time.Second*20 {
+				if grid.OpenAt < bid1*0.92 && time.Now().Sub(order.DeleteAt) > time.Second*20 {
 					client.deleteOrder(order.Id)
 					order.DeleteAt = time.Now()
 				}
@@ -53,7 +53,7 @@ func check() bool {
 		// 高于当前盘口太远的卖盘不挂
 		for _, order := range grid.CloseOrders.Orders {
 			if grid.CloseAt > ask1 {
-				if grid.CloseAt > ask1*1.15 && time.Now().Sub(order.DeleteAt) > time.Second*20 {
+				if grid.CloseAt > ask1*1.08 && time.Now().Sub(order.DeleteAt) > time.Second*20 {
 					client.deleteOrder(order.Id)
 					order.DeleteAt = time.Now()
 				}
@@ -65,7 +65,7 @@ func check() bool {
 	for index, grid := range grids {
 		// 买入仅仅当行情大于格子价格才会形成挂单
 
-		if grid.OpenChance >= perp.SizeIncrement && grid.OpenAt <= bid1 && grid.OpenAt > (bid1*0.86) {
+		if grid.OpenChance >= perp.SizeIncrement && grid.OpenAt <= bid1 && grid.OpenAt > (bid1*0.95) {
 			clientId := uuid.New().String()
 			order := &GridOrder{
 				ClientId: clientId,
@@ -83,7 +83,7 @@ func check() bool {
 			orderMap.add(order)
 		}
 
-		if grid.CloseChance >= perp.SizeIncrement && grid.CloseAt < ask1*1.14 {
+		if grid.CloseChance >= perp.SizeIncrement && grid.CloseAt >= ask1 && grid.CloseAt < ask1*1.05 {
 			clientId := uuid.New().String()
 			order := &GridOrder{
 				ClientId: clientId,
@@ -138,6 +138,8 @@ func onOrderChange(order *Order) {
 		} else {
 			grid.OpenChance += delta
 			grid.CloseTotal += delta
+
+			profitTotal += delta * (grid.CloseAt - grid.OpenAt)
 		}
 	}
 
