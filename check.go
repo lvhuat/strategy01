@@ -65,7 +65,7 @@ func check() bool {
 	for index, grid := range grids {
 		// 买入仅仅当行情大于格子价格才会形成挂单
 
-		if grid.OpenChance >= perp.SizeIncrement && grid.OpenAt <= bid1 && grid.OpenAt > (bid1*0.95) {
+		if grid.OpenChance >= perp.SizeIncrement && grid.OpenAt > (bid1*0.95) {
 			clientId := uuid.New().String()
 			order := &GridOrder{
 				ClientId: clientId,
